@@ -24,7 +24,7 @@ public class CustomerController {
     }
 
     @GetMapping
-    public List<Customer> getAllCustomer(@RequestParam(name = "search",required = false) String search){
+    public List<Customer> getAllCustomer(@RequestParam(name = "search", required = false) String search){
         return customerService.getAll(search);
     }
 

@@ -23,8 +23,13 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<Customer> getAll(String name) {
-        return customerRepository.findAll();
+    public List<Customer> getAll(String search) {
+        System.out.println("INI SEARCH:" + search);
+
+        if (search == null || search.isEmpty()) {
+            return customerRepository.findAll();
+        }
+        return customerRepository.findByFullNameContainingIgnoreCase(search);
     }
 
     @Override

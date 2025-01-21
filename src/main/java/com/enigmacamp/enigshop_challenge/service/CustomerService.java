@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface CustomerService {
     Customer create(Customer customer);
-    List<Customer> getAll(String name);
+    List<Customer> getAll(String search);
     Customer getById(String id);
     Customer updatePut(Customer customer);
     Customer updatePatch(Customer customer);
