@@ -1,11 +1,21 @@
 package com.enigmacamp.enigshop_challenge.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
 import java.util.UUID;
 
+@Entity
 public class Customer {
+    @Id
     UUID Id;
     String fullName;
+
+    @Column(unique = true)
     String email;
+
+    @Column(unique = true)
     String phoneNumber;
     String address;
     Boolean isActive;

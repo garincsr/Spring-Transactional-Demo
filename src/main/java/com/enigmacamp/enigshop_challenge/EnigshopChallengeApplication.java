@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class EnigshopChallengeApplication {
 
 	public static void main(String[] args) {
-		ProductController productController = new ProductController();
 		SpringApplication.run(EnigshopChallengeApplication.class, args);
 	}
 

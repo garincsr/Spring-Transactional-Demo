@@ -1,6 +1,7 @@
 package com.enigmacamp.enigshop_challenge.controller;
 
 import com.enigmacamp.enigshop_challenge.model.Customer;
+import com.enigmacamp.enigshop_challenge.repository.CustomerRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping(path = "/customers")
 public class CustomerController {
+//    private CustomerRepository customerRepository;
     private List<Customer> customerList = new ArrayList<>();
 
     public CustomerController() {
@@ -22,6 +24,7 @@ public class CustomerController {
         Customer newCustomer = new Customer(customer.getFullName(), customer.getEmail(), customer.getPhoneNumber(), customer.getAddress(), customer.getActive());
         customerList.add(newCustomer);
         return newCustomer;
+//        return customerRepository.save(customer);
     }
 
     @GetMapping
@@ -33,6 +36,8 @@ public class CustomerController {
         } else {
             throw new RuntimeException("No customer found");
         }
+
+//        return customerRepository.findAll();
     }
 
     @GetMapping("/{productName}")

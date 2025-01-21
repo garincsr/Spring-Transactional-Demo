@@ -1,9 +1,17 @@
 package com.enigmacamp.enigshop_challenge.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
 import java.util.UUID;
 
+@Entity
 public class Product {
+    @Id
     UUID Id;
+
+    @Column(name = "productName")
     String name;
     Double price;
     Integer stock;
