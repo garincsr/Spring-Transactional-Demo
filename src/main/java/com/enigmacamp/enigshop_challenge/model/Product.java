@@ -1,69 +1,31 @@
 package com.enigmacamp.enigshop_challenge.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.UUID;
-
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class Product {
     @Id
-    UUID Id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
-    @Column(name = "productName")
-    String name;
-    Double price;
-    Integer stock;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    public Product(String name, Double price, Integer stock) {
-        Id = UUID.randomUUID();
-        this.name = name;
-        this.price = price;
-        this.stock = stock;
-    }
+    @Column(name = "description", nullable = false)
+    private String description;
 
-    public Product() {}
+    @Column(name = "price", nullable = false, columnDefinition = "BIGINT CHECK (price >= 0)")
+    private Long price;
 
-    public UUID getId() {
-        return Id;
-    }
-
-    public void setId(UUID id) {
-        Id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
-    @Override
-    public String toString() {
-        return "Product{" +
-                "Id=" + Id +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", stock=" + stock +
-                '}';
-    }
+    @Column(name = "stock", nullable = false, columnDefinition = "INT CHECK (stock >= 0)")
+    private Integer stock;
 }
