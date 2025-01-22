@@ -1,8 +1,12 @@
 package com.enigmacamp.enigshop_challenge.service.impl;
 
-import com.enigmacamp.enigshop_challenge.model.Customer;
+import com.enigmacamp.enigshop_challenge.model.dto.request.CustomerRequest;
+import com.enigmacamp.enigshop_challenge.model.dto.response.CustomerResponse;
+import com.enigmacamp.enigshop_challenge.model.entity.Customer;
 import com.enigmacamp.enigshop_challenge.repository.CustomerRepository;
 import com.enigmacamp.enigshop_challenge.service.CustomerService;
+import com.enigmacamp.enigshop_challenge.utils.customException.ResourceNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,63 +15,79 @@ import java.util.Optional;
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
+    @Autowired
     private CustomerRepository customerRepository;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
+    @Override
+    public CustomerResponse create(CustomerRequest request) {
+        Customer newCustomer = this.mapToEntity(request);
+        newCustomer = customerRepository.save(newCustomer);
+        return this.mapToResponse(newCustomer);
     }
 
     @Override
-    public Customer create(Customer customer) {
-        return customerRepository.save(customer);
-    }
-
-    @Override
-    public List<Customer> getAll(String search) {
-        System.out.println("INI SEARCH:" + search);
-
-        if (search == null || search.isEmpty()) {
-            return customerRepository.findAll();
+    public List<CustomerResponse> getAll(String name) {
+        if (name == null || name.isEmpty()) {
+            return customerRepository.findAll().stream().map(this::mapToResponse).toList();
         }
-        return customerRepository.findByFullNameContainingIgnoreCase(search);
+        return customerRepository.findByFullNameContainingIgnoreCase(name).stream().map(this::mapToResponse).toList();
     }
 
     @Override
-    public Customer getById(String id) {
-        Optional<Customer> customer = customerRepository.findById(id);
-        return customer.orElseThrow(() -> new RuntimeException("Customer not found!"));
+    public CustomerResponse getById(String id) {
+        return mapToResponse(this.findByIdOrThrowNotFound(id));
+    }
 
+    private Customer findByIdOrThrowNotFound(String id){
+        return customerRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Product not found", new RuntimeException("Product not found"))
+        );
     }
 
     @Override
-    public Customer updatePut(Customer customer) {
-        Customer existingCustomer = getById(customer.getId());
-
-        existingCustomer.setFullName(customer.getFullName());
-        existingCustomer.setEmail(customer.getFullName());
-        existingCustomer.setPhoneNumber(customer.getPhoneNumber());
-        existingCustomer.setAddress(customer.getAddress());
-        existingCustomer.setIsActive(customer.getIsActive());
-
-        return customerRepository.saveAndFlush(existingCustomer);
+    public CustomerResponse updatePut(CustomerRequest request) {
+        this.findByIdOrThrowNotFound(request.getId());
+        Customer customer = this.mapToEntity(request);
+        return this.mapToResponse(customerRepository.saveAndFlush(customer));
     }
 
     @Override
-    public Customer updatePatch(Customer customer) {
-        Customer existingCustomer = getById(customer.getId());
+    public CustomerResponse updatePatch(CustomerRequest request) {
+        Customer existingCustomer = this.findByIdOrThrowNotFound(request.getId());
 
-        if (customer.getFullName() != null) existingCustomer.setFullName(customer.getFullName());
-        if (customer.getEmail() != null) existingCustomer.setEmail(customer.getEmail());
-        if (customer.getPhoneNumber() != null) existingCustomer.setPhoneNumber(customer.getPhoneNumber());
-        if (customer.getIsActive() != null) existingCustomer.setIsActive(customer.getIsActive());
+        if (request.getFullName() != null) existingCustomer.setFullName(request.getFullName());
+        if (request.getEmail() != null) existingCustomer.setEmail(request.getEmail());
+        if (request.getPhoneNumber() != null) existingCustomer.setPhoneNumber(request.getPhoneNumber());
+        if (request.getAddress() != null) existingCustomer.setAddress(request.getAddress());
+        if(request.getIsActive() != null) existingCustomer.setIsActive(request.getIsActive());
 
-        return customerRepository.saveAndFlush(existingCustomer);
-
+        return  mapToResponse(customerRepository.saveAndFlush(existingCustomer));
     }
 
     @Override
     public void deleteById(String id) {
-        Customer existingCustomer = getById(id);
+        Customer existingCustomer = this.findByIdOrThrowNotFound(id);
         customerRepository.delete(existingCustomer);
+    }
+
+    private Customer mapToEntity(CustomerRequest request){
+        return Customer.builder()
+                .fullName(request.getFullName())
+                .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .address(request.getAddress())
+                .isActive(request.getIsActive())
+                .build();
+    }
+
+    private CustomerResponse mapToResponse(Customer customer){
+        return CustomerResponse.builder()
+                .id(customer.getId())
+                .fullName(customer.getFullName())
+                .email(customer.getEmail())
+                .phoneNumber(customer.getPhoneNumber())
+                .address(customer.getAddress())
+                .isActive(customer.getIsActive())
+                .build();
     }
 }

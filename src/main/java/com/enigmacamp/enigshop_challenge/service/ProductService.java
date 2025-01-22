@@ -1,14 +1,16 @@
 package com.enigmacamp.enigshop_challenge.service;
 
-import com.enigmacamp.enigshop_challenge.model.Product;
+import com.enigmacamp.enigshop_challenge.model.dto.request.ProductRequest;
+import com.enigmacamp.enigshop_challenge.model.dto.response.ProductResponse;
+import com.enigmacamp.enigshop_challenge.model.entity.Product;
 
 import java.util.List;
 
 public interface ProductService {
-    Product create(Product product);
-    List<Product> getAll(String search);
-    Product getById(String id);
-    Product updatePut(Product product);
-    Product updatePatch(Product product);
+    ProductResponse create(ProductRequest request);
+    List<ProductResponse> getAll(String name);
+    ProductResponse getById(String id);
+    ProductResponse updatePut(ProductRequest request);
+    ProductResponse updatePatch(ProductRequest request);
     void deleteById(String id);
 }

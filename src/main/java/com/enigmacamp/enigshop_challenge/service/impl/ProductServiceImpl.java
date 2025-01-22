@@ -1,75 +1,95 @@
 package com.enigmacamp.enigshop_challenge.service.impl;
 
-import com.enigmacamp.enigshop_challenge.model.Product;
+import com.enigmacamp.enigshop_challenge.model.dto.request.ProductRequest;
+import com.enigmacamp.enigshop_challenge.model.dto.response.ProductResponse;
+import com.enigmacamp.enigshop_challenge.model.entity.Product;
 import com.enigmacamp.enigshop_challenge.repository.ProductRepository;
 import com.enigmacamp.enigshop_challenge.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.enigmacamp.enigshop_challenge.utils.customException.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
 //    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
     @Override
-    public Product create(Product product) {
-        // TODO: Insert Product to Product ID
-        return productRepository.save(product);
+    public ProductResponse create(ProductRequest request) {
+        Product product = this.mapToEntity(request);
+        product = productRepository.save(product);
+        return this.mapToResponse(product);
     }
 
     @Override
-    public List<Product> getAll(String search) {
-        if (search == null || search.isEmpty()) {
-            return productRepository.findAll();
-        }
-        return productRepository.searchProductsByName(search);
+    public List<ProductResponse> getAll(String name) {
+       if (name != null && !name.isEmpty()){
+           return productRepository.findByNameContainingIgnoreCase(name).stream().map(this::mapToResponse).toList();
+       }
+       return productRepository.findAll().stream().map(this::mapToResponse).toList();
     }
 
     @Override
-    public Product getById(String id) {
-        Optional<Product> product = productRepository.findById(id);
-        return product.orElseThrow(() -> new RuntimeException("Product not found!"));
+    public ProductResponse getById(String id) {
+        return this.mapToResponse(this.findByIdOrThrowNotFound(id));
+    }
+
+    private Product findByIdOrThrowNotFound(String id){
+        return productRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Product not found", new RuntimeException("Product not found"))
+        );
     }
 
     @Override
-    public Product updatePut(Product product) {
-        Product existingProduct = getById(product.getId());
-
-        existingProduct.setName(product.getName());
-        existingProduct.setDescription(product.getDescription());
-        existingProduct.setPrice(product.getPrice());
-        existingProduct.setStock(product.getStock());
-
-        return productRepository.saveAndFlush(existingProduct);
-
+    public ProductResponse updatePut(ProductRequest request) {
+        this.findByIdOrThrowNotFound(request.getId());
+        Product product = this.mapToEntity(request);
+        return this.mapToResponse(productRepository.saveAndFlush(product));
     }
 
     @Override
-    public Product updatePatch(Product product) {
+    public ProductResponse updatePatch(ProductRequest request) {
         // TODO: Check date avalailable on DB:
-        Product existingProduct = getById(product.getId());
+        Product existingProduct = findByIdOrThrowNotFound(request.getId());
 
         // TODO: Check field want to update:
-        if (product.getName() != null) existingProduct.setName(product.getName());
-        if (product.getDescription() != null) existingProduct.setDescription(product.getDescription());
-        if (product.getPrice() != null) existingProduct.setPrice(product.getPrice());
-        if (product.getStock() != null) existingProduct.setStock(product.getStock());
+        if (request.getName() != null) existingProduct.setName(request.getName());
+        if (request.getDescription() != null) existingProduct.setDescription(request.getDescription());
+        if (request.getPrice() != null) existingProduct.setPrice(request.getPrice());
+        if (request.getStock() != null) existingProduct.setStock(request.getStock());
 
         // TODO: Save product update to DB:
-        return productRepository.saveAndFlush(existingProduct);
+        return mapToResponse(productRepository.saveAndFlush(existingProduct));
     }
 
     @Override
     public void deleteById(String id) {
-        Product existingProduct = getById(id);
+        Product existingProduct = this.findByIdOrThrowNotFound(id);
         productRepository.delete(existingProduct);
+    }
+
+    private ProductResponse mapToResponse(Product product){
+        return ProductResponse.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .stock(product.getStock())
+                .build();
+    }
+
+    private Product mapToEntity(ProductRequest request){
+        return Product.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .price(request.getPrice())
+                .stock(request.getStock())
+                .build();
     }
 }

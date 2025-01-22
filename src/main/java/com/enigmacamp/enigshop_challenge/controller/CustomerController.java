@@ -1,13 +1,15 @@
 package com.enigmacamp.enigshop_challenge.controller;
 
 import com.enigmacamp.enigshop_challenge.constant.APIUrl;
-import com.enigmacamp.enigshop_challenge.model.Customer;
+import com.enigmacamp.enigshop_challenge.model.dto.request.CustomerRequest;
+import com.enigmacamp.enigshop_challenge.model.dto.response.CustomerResponse;
+import com.enigmacamp.enigshop_challenge.model.entity.Customer;
 import com.enigmacamp.enigshop_challenge.service.CustomerService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping(path = APIUrl.CUSTOMER_API)
@@ -19,27 +21,28 @@ public class CustomerController {
     }
 
     @PostMapping
-    public Customer addNewCustomer(@RequestBody Customer customer){
-        return customerService.create(customer);
+    public ResponseEntity<?> addNewCustomer(@Valid @RequestBody CustomerRequest payload){
+        CustomerResponse response = customerService.create(payload);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public List<Customer> getAllCustomer(@RequestParam(name = "search", required = false) String search){
+    public List<CustomerResponse> getAllCustomer(@RequestParam(name = "search", required = false) String search){
         return customerService.getAll(search);
     }
 
     @GetMapping("/{id}")
-    public Customer getCustomerById(@PathVariable String id){
+    public CustomerResponse getCustomerById(@PathVariable String id){
         return customerService.getById(id);
     }
 
     @PutMapping("/{id}")
-    public Customer updateCustomer(@RequestBody Customer payload){
+    public CustomerResponse updateCustomer(@RequestBody CustomerRequest payload){
         return customerService.updatePut(payload);
     }
 
     @PatchMapping("/{id}")
-    public Customer updateCustomerById(@RequestBody Customer payload){
+    public CustomerResponse updateCustomerById(@RequestBody CustomerRequest payload){
        return customerService.updatePatch(payload);
     }
 
