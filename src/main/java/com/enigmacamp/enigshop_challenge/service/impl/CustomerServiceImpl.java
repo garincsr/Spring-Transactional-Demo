@@ -40,7 +40,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     private Customer findByIdOrThrowNotFound(String id){
         return customerRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Product not found", new RuntimeException("Product not found"))
+                () -> new ResourceNotFoundException("Customer Not Found", new RuntimeException("Customer Not Found"))
         );
     }
 
@@ -59,7 +59,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (request.getEmail() != null) existingCustomer.setEmail(request.getEmail());
         if (request.getPhoneNumber() != null) existingCustomer.setPhoneNumber(request.getPhoneNumber());
         if (request.getAddress() != null) existingCustomer.setAddress(request.getAddress());
-        if(request.getIsActive() != null) existingCustomer.setIsActive(request.getIsActive());
+        if (request.getIsActive() != null) existingCustomer.setIsActive(request.getIsActive());
 
         return  mapToResponse(customerRepository.saveAndFlush(existingCustomer));
     }

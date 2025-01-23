@@ -2,9 +2,12 @@ package com.enigmacamp.enigshop_challenge.controller;
 
 import com.enigmacamp.enigshop_challenge.constant.APIUrl;
 import com.enigmacamp.enigshop_challenge.model.dto.request.ProductRequest;
+import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.CommonResponse;
+import com.enigmacamp.enigshop_challenge.model.dto.response.PagingResponse;
 import com.enigmacamp.enigshop_challenge.model.dto.response.ProductResponse;
 import com.enigmacamp.enigshop_challenge.service.ProductService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,16 +38,37 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<CommonResponse<List<ProductResponse>>> getAllProduct(@RequestParam(name = "search",required = false) String search) {
-        List<ProductResponse> productResponses = productService.getAll(search);
+    public ResponseEntity<CommonResponse<List<ProductResponse>>> getAllProduct(
+            @RequestParam(name = "search",required = false) String search,
+            @RequestParam(name = "page",defaultValue = "1") Integer page,
+            @RequestParam(name = "size",defaultValue = "10") Integer size
+    ) {
+        SearchRequest request = SearchRequest.builder()
+                .query(search)
+                .page(Math.max(page - 1, 0))
+                .size(size)
+                .build();
+
+        Page<ProductResponse> products = productService.getAll(request);
+        PagingResponse paging = PagingResponse.builder()
+                .totalPage(products.getTotalPages())
+                .totalElement(products.getTotalElements())
+                .page(page)
+                .size(size)
+                .hashNext(products.hasNext())
+                .hashPrevious(products.hasPrevious())
+                .build();
+
         CommonResponse<List<ProductResponse>> commonResponse = CommonResponse.<List<ProductResponse>>builder()
                 .status(HttpStatus.OK.value())
                 .message("Product Found")
-                .data(productResponses)
+                .data(products.getContent())
+                .paging(paging)
                 .build();
 
         return ResponseEntity
                 .ok()
+                .header("Content type", "Apllication/json")
                 .body(commonResponse);
     }
 

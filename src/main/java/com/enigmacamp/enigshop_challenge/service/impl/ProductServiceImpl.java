@@ -1,11 +1,15 @@
 package com.enigmacamp.enigshop_challenge.service.impl;
 
 import com.enigmacamp.enigshop_challenge.model.dto.request.ProductRequest;
+import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.ProductResponse;
 import com.enigmacamp.enigshop_challenge.model.entity.Product;
 import com.enigmacamp.enigshop_challenge.repository.ProductRepository;
 import com.enigmacamp.enigshop_challenge.service.ProductService;
 import com.enigmacamp.enigshop_challenge.utils.customException.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,11 +32,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponse> getAll(String name) {
-       if (name != null && !name.isEmpty()){
-           return productRepository.findByNameContainingIgnoreCase(name).stream().map(this::mapToResponse).toList();
-       }
-       return productRepository.findAll().stream().map(this::mapToResponse).toList();
+    public Page<ProductResponse> getAll(SearchRequest request) {
+//       if (name != null && !name.isEmpty()){
+//           return productRepository.findByNameContainingIgnoreCase(name).stream().map(this::mapToResponse).toList();
+//       }
+       Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
+       return productRepository.findAll(pageable).map(this::mapToResponse);
     }
 
     @Override
