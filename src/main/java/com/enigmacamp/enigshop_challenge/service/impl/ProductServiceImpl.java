@@ -5,11 +5,14 @@ import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.ProductResponse;
 import com.enigmacamp.enigshop_challenge.model.entity.Product;
 import com.enigmacamp.enigshop_challenge.repository.ProductRepository;
+import com.enigmacamp.enigshop_challenge.repository.specification.ProductSpecification;
 import com.enigmacamp.enigshop_challenge.service.ProductService;
 import com.enigmacamp.enigshop_challenge.utils.customException.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,11 +36,24 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductResponse> getAll(SearchRequest request) {
-//       if (name != null && !name.isEmpty()){
-//           return productRepository.findByNameContainingIgnoreCase(name).stream().map(this::mapToResponse).toList();
-//       }
-       Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
-       return productRepository.findAll(pageable).map(this::mapToResponse);
+
+        Sort sort;
+        try {
+            sort = Sort.by(request.getDirection().equalsIgnoreCase("dsc") ? Sort.Direction.DESC : Sort.Direction.ASC, request.getSort());
+        } catch (IllegalArgumentException e) {
+            // Jika terjadi IllegalArgumentException, gunakan default
+            sort = Sort.by(Sort.Direction.ASC, request.getSort());
+        }
+
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
+
+        // Jika query pencarian disediakan, filter hasil
+        if (request.getQuery() != null && !request.getQuery().isEmpty()) {
+            Specification<Product> spec = Specification.where(ProductSpecification.hasName(request.getQuery()));
+            return productRepository.findAll(spec,pageable) .map(this::mapToResponse);
+        }
+
+        return productRepository.findAll(pageable).map(this::mapToResponse);
     }
 
     @Override
@@ -61,7 +77,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse updatePatch(ProductRequest request) {
         // TODO: Check date avalailable on DB:
-        Product existingProduct = findByIdOrThrowNotFound(request.getId());
+        Product existingProduct = this.findByIdOrThrowNotFound(request.getId());
 
         // TODO: Check field want to update:
         if (request.getName() != null) existingProduct.setName(request.getName());

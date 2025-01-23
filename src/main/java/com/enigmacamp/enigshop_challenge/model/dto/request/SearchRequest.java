@@ -7,6 +7,9 @@ import lombok.Data;
 @Builder
 public class SearchRequest {
     private String query;
+    private String code;
     private Integer page;
     private Integer size;
+    private String sort;
+    private String direction;
 }

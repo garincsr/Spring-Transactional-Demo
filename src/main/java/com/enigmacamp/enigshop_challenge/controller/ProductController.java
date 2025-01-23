@@ -40,35 +40,36 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<CommonResponse<List<ProductResponse>>> getAllProduct(
-            @RequestParam(name = "search",required = false) String search,
-            @RequestParam(name = "page",defaultValue = "1") String page,
-            @RequestParam(name = "size",defaultValue = "10") String size
+            @RequestParam(name = "search",required = false) String name,
+            @RequestParam(name = "page",defaultValue = "1") Integer page,
+            @RequestParam(name = "size",defaultValue = "10") Integer size,
+            @RequestParam(name = "sort",defaultValue = "id", required = false) String sort,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction
     ) {
 
-        if (GlobalExceptionController.isDigit(page)){
-            page = "1";
+        if (isDigit(page.toString()) || page <= 0) {
+            page = 1;
         }
 
-        if (GlobalExceptionController.isDigit(size)){
-            size = "10";
+        if (isDigit(size.toString()) || size <= 0) {
+            size = 10;
         }
 
-        if (size.equals("0")){
-            size = "10";
-        }
 
         SearchRequest request = SearchRequest.builder()
-                .query(search)
-                .page(Math.max(Integer.parseInt(page) - 1, 0))
-                .size(Math.max(Integer.parseInt(size), 0))
+                .query(name)
+                .page(Math.max(page - 1, 0))
+                .size(Math.max(size, 0))
+                .sort(sort)
+                .direction(direction)
                 .build();
 
         Page<ProductResponse> products = productService.getAll(request);
         PagingResponse paging = PagingResponse.builder()
                 .totalPage(products.getTotalPages())
                 .totalElement(products.getTotalElements())
-                .page(Integer.parseInt(page))
-                .size(Integer.parseInt(size))
+                .page(page - 1)
+                .size(size)
                 .hashNext(products.hasNext())
                 .hashPrevious(products.hasPrevious())
                 .build();
@@ -139,5 +140,14 @@ public class ProductController {
        return ResponseEntity
                .ok()
                .body(commonResponse);
+    }
+
+    private boolean isDigit(String str) {
+        for (char c : str.toCharArray()) {
+            if (Character.isLetter(c)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
