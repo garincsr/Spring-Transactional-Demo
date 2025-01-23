@@ -1,6 +1,7 @@
 package com.enigmacamp.enigshop_challenge.controller;
 
 import com.enigmacamp.enigshop_challenge.constant.APIUrl;
+import com.enigmacamp.enigshop_challenge.controller.exception.GlobalExceptionController;
 import com.enigmacamp.enigshop_challenge.model.dto.request.ProductRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.CommonResponse;
@@ -44,21 +45,22 @@ public class ProductController {
             @RequestParam(name = "size",defaultValue = "10") String size
     ) {
 
-        if (isDigit(page)){
+        if (GlobalExceptionController.isDigit(page)){
             page = "1";
         }
 
-        if (isDigit(size)){
+        if (GlobalExceptionController.isDigit(size)){
             size = "10";
         }
 
-        int pageNumber = Math.max(Integer.parseInt(page) - 1, 0); // Adjust for zero-based index
-        int sizeNumber = Math.max(Integer.parseInt(size), 10); // Minimum size of 10
+        if (size.equals("0")){
+            size = "10";
+        }
 
         SearchRequest request = SearchRequest.builder()
                 .query(search)
-                .page(pageNumber)
-                .size(sizeNumber)
+                .page(Math.max(Integer.parseInt(page) - 1, 0))
+                .size(Math.max(Integer.parseInt(size), 0))
                 .build();
 
         Page<ProductResponse> products = productService.getAll(request);
@@ -137,14 +139,5 @@ public class ProductController {
        return ResponseEntity
                .ok()
                .body(commonResponse);
-    }
-
-    private boolean isDigit(String str) {
-        for (char c : str.toCharArray()) {
-            if (Character.isLetter(c)) {
-                return true; // Return true if any character is a letter
-            }
-        }
-        return false;
     }
 }

@@ -81,4 +81,13 @@ public class GlobalExceptionController {
 
         return ResponseEntity.badRequest().body(response);
     }
+
+    public static boolean isDigit(String str) {
+        for (char c : str.toCharArray()) {
+            if (Character.isLetter(c)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

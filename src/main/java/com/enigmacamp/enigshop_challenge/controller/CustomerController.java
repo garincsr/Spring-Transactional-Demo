@@ -1,6 +1,7 @@
 package com.enigmacamp.enigshop_challenge.controller;
 
 import com.enigmacamp.enigshop_challenge.constant.APIUrl;
+import com.enigmacamp.enigshop_challenge.controller.exception.GlobalExceptionController;
 import com.enigmacamp.enigshop_challenge.model.dto.request.CustomerRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.CommonResponse;
@@ -46,29 +47,30 @@ public class CustomerController {
 //        Integer pageNumber = Math.max(page, 0);
 //        Integer sizeNumber = Math.max(size, 1);
 
-        Integer pageNumber = 1;
-        Integer sizeNumber = 10;
-        try {
-            pageNumber = Integer.parseInt(page);
-            sizeNumber = Integer.parseInt(size);
-            if (pageNumber < 1 && sizeNumber < 0) {
-                pageNumber = 1;
-                sizeNumber = 10;
-            }
-        } catch (NumberFormatException e) {}
+        if (GlobalExceptionController.isDigit(page)){
+            page = "1";
+        }
+
+        if (GlobalExceptionController.isDigit(size)){
+            size = "10";
+        }
+
+        if (size.equals("0")){
+            size = "10";
+        }
 
         SearchRequest request = SearchRequest.builder()
                 .query(search)
-                .page(pageNumber - 1)
-                .size(sizeNumber)
+                .page(Math.max(Integer.parseInt(page) - 1, 0))
+                .size(Math.max(Integer.parseInt(size), 0))
                 .build();
 
         Page<CustomerResponse> customers = customerService.getAll(request);
         PagingResponse paging = PagingResponse.builder()
                 .totalPage(customers.getTotalPages())
                 .totalElement(customers.getTotalElements())
-                .page(pageNumber - 1)
-                .size(sizeNumber)
+                .page(Integer.parseInt(page))
+                .size(Integer.parseInt(size))
                 .hashNext(customers.hasNext())
                 .hashPrevious(customers.hasPrevious())
                 .build();
