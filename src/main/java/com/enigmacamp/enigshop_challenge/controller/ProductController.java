@@ -40,21 +40,33 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<CommonResponse<List<ProductResponse>>> getAllProduct(
             @RequestParam(name = "search",required = false) String search,
-            @RequestParam(name = "page",defaultValue = "1") Integer page,
-            @RequestParam(name = "size",defaultValue = "10") Integer size
+            @RequestParam(name = "page",defaultValue = "1") String page,
+            @RequestParam(name = "size",defaultValue = "10") String size
     ) {
+
+        if (isDigit(page)){
+            page = "1";
+        }
+
+        if (isDigit(size)){
+            size = "10";
+        }
+
+        int pageNumber = Math.max(Integer.parseInt(page) - 1, 0); // Adjust for zero-based index
+        int sizeNumber = Math.max(Integer.parseInt(size), 10); // Minimum size of 10
+
         SearchRequest request = SearchRequest.builder()
                 .query(search)
-                .page(Math.max(page - 1, 0))
-                .size(size)
+                .page(pageNumber)
+                .size(sizeNumber)
                 .build();
 
         Page<ProductResponse> products = productService.getAll(request);
         PagingResponse paging = PagingResponse.builder()
                 .totalPage(products.getTotalPages())
                 .totalElement(products.getTotalElements())
-                .page(page)
-                .size(size)
+                .page(Integer.parseInt(page))
+                .size(Integer.parseInt(size))
                 .hashNext(products.hasNext())
                 .hashPrevious(products.hasPrevious())
                 .build();
@@ -127,5 +139,12 @@ public class ProductController {
                .body(commonResponse);
     }
 
-
+    private boolean isDigit(String str) {
+        for (char c : str.toCharArray()) {
+            if (Character.isLetter(c)) {
+                return true; // Return true if any character is a letter
+            }
+        }
+        return false;
+    }
 }

@@ -1,12 +1,16 @@
 package com.enigmacamp.enigshop_challenge.service.impl;
 
 import com.enigmacamp.enigshop_challenge.model.dto.request.CustomerRequest;
+import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.CustomerResponse;
 import com.enigmacamp.enigshop_challenge.model.entity.Customer;
 import com.enigmacamp.enigshop_challenge.repository.CustomerRepository;
 import com.enigmacamp.enigshop_challenge.service.CustomerService;
 import com.enigmacamp.enigshop_challenge.utils.customException.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,11 +30,9 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<CustomerResponse> getAll(String name) {
-        if (name == null || name.isEmpty()) {
-            return customerRepository.findAll().stream().map(this::mapToResponse).toList();
-        }
-        return customerRepository.findByFullNameContainingIgnoreCase(name).stream().map(this::mapToResponse).toList();
+    public Page<CustomerResponse> getAll(SearchRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
+        return customerRepository.findAll(pageable).map(this::mapToResponse);
     }
 
     @Override

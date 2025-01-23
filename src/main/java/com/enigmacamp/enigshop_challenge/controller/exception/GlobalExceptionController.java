@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 import java.util.Map;
@@ -45,5 +46,39 @@ public class GlobalExceptionController {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<CommonResponse<String>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        Integer pageNumber = 0;
+        Integer sizeNumber = 10;
+
+        // Check if the parameter name is "page" or "size"
+        if ("page".equals(ex.getName())) {
+            // Handle page parameter mismatch
+            CommonResponse<String> response = CommonResponse.<String>builder()
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .message("Page parameter is invalid; defaulting to page=0")
+                    .data(null) // No data in this case
+                    .build();
+            return ResponseEntity.ok(response);
+        } else if ("size".equals(ex.getName())) {
+            // Handle size parameter mismatch
+            CommonResponse<String> response = CommonResponse.<String>builder()
+                    .status(HttpStatus.BAD_REQUEST.value())
+                    .message("Size parameter is invalid; defaulting to size=10")
+                    .data(null) // No data in this case
+                    .build();
+            return ResponseEntity.ok(response);
+        }
+
+        // For other type mismatches, return a generic error response
+        CommonResponse<String> response = CommonResponse.<String>builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Invalid request")
+                .data(null)
+                .build();
+
+        return ResponseEntity.badRequest().body(response);
     }
 }

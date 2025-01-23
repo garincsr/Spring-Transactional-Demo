@@ -1,5 +1,6 @@
 package com.enigmacamp.enigshop_challenge.model.entity;
 
+import com.enigmacamp.enigshop_challenge.constant.ConstantTable;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(name = ConstantTable.PRODUCT)
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

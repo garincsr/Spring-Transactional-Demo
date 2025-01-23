@@ -2,10 +2,13 @@ package com.enigmacamp.enigshop_challenge.controller;
 
 import com.enigmacamp.enigshop_challenge.constant.APIUrl;
 import com.enigmacamp.enigshop_challenge.model.dto.request.CustomerRequest;
+import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.CommonResponse;
 import com.enigmacamp.enigshop_challenge.model.dto.response.CustomerResponse;
+import com.enigmacamp.enigshop_challenge.model.dto.response.PagingResponse;
 import com.enigmacamp.enigshop_challenge.service.CustomerService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,12 +38,46 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<CommonResponse<List<CustomerResponse>>> getAllCustomer(@RequestParam(name = "search", required = false) String search){
-        List<CustomerResponse> customerResponses = customerService.getAll(search);
+    public ResponseEntity<CommonResponse<List<CustomerResponse>>> getAllCustomer(
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "page",defaultValue = "1") String  page,
+            @RequestParam(name = "size",defaultValue = "10") String size
+    ){
+//        Integer pageNumber = Math.max(page, 0);
+//        Integer sizeNumber = Math.max(size, 1);
+
+        Integer pageNumber = 1;
+        Integer sizeNumber = 10;
+        try {
+            pageNumber = Integer.parseInt(page);
+            sizeNumber = Integer.parseInt(size);
+            if (pageNumber < 1 && sizeNumber < 0) {
+                pageNumber = 1;
+                sizeNumber = 10;
+            }
+        } catch (NumberFormatException e) {}
+
+        SearchRequest request = SearchRequest.builder()
+                .query(search)
+                .page(pageNumber - 1)
+                .size(sizeNumber)
+                .build();
+
+        Page<CustomerResponse> customers = customerService.getAll(request);
+        PagingResponse paging = PagingResponse.builder()
+                .totalPage(customers.getTotalPages())
+                .totalElement(customers.getTotalElements())
+                .page(pageNumber - 1)
+                .size(sizeNumber)
+                .hashNext(customers.hasNext())
+                .hashPrevious(customers.hasPrevious())
+                .build();
+
         CommonResponse<List<CustomerResponse>> commonResponse = CommonResponse.<List<CustomerResponse>>builder()
                 .status(HttpStatus.OK.value())
                 .message("Customer Found")
-                .data(customerResponses)
+                .data(customers.getContent())
+                .paging(paging)
                 .build();
 
         return ResponseEntity
