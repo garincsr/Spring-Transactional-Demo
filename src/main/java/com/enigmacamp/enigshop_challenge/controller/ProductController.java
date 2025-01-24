@@ -1,13 +1,13 @@
 package com.enigmacamp.enigshop_challenge.controller;
 
 import com.enigmacamp.enigshop_challenge.constant.APIUrl;
-import com.enigmacamp.enigshop_challenge.controller.exception.GlobalExceptionController;
 import com.enigmacamp.enigshop_challenge.model.dto.request.ProductRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.CommonResponse;
 import com.enigmacamp.enigshop_challenge.model.dto.response.PagingResponse;
 import com.enigmacamp.enigshop_challenge.model.dto.response.ProductResponse;
 import com.enigmacamp.enigshop_challenge.service.ProductService;
+import com.enigmacamp.enigshop_challenge.utils.PagingSizingUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,25 +41,20 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<CommonResponse<List<ProductResponse>>> getAllProduct(
             @RequestParam(name = "search",required = false) String name,
-            @RequestParam(name = "page",defaultValue = "1") Integer page,
-            @RequestParam(name = "size",defaultValue = "10") Integer size,
+            @RequestParam(name = "page",defaultValue = "1") String  page,
+            @RequestParam(name = "size",defaultValue = "10") String size,
             @RequestParam(name = "sort",defaultValue = "id", required = false) String sort,
             @RequestParam(name = "direction", defaultValue = "asc") String direction
     ) {
 
-        if (isDigit(page.toString()) || page <= 0) {
-            page = 1;
-        }
-
-        if (isDigit(size.toString()) || size <= 0) {
-            size = 10;
-        }
+       Integer validatePage = PagingSizingUtils.validatePage(page);
+       Integer validateSize = PagingSizingUtils.validateSize(size);
 
 
         SearchRequest request = SearchRequest.builder()
                 .query(name)
-                .page(Math.max(page - 1, 0))
-                .size(Math.max(size, 0))
+                .page(Math.max(validatePage - 1, 0))
+                .size(Math.max(validateSize, 0))
                 .sort(sort)
                 .direction(direction)
                 .build();
@@ -68,8 +63,8 @@ public class ProductController {
         PagingResponse paging = PagingResponse.builder()
                 .totalPage(products.getTotalPages())
                 .totalElement(products.getTotalElements())
-                .page(page - 1)
-                .size(size)
+                .page(validatePage)
+                .size(validateSize)
                 .hashNext(products.hasNext())
                 .hashPrevious(products.hasPrevious())
                 .build();
@@ -140,14 +135,5 @@ public class ProductController {
        return ResponseEntity
                .ok()
                .body(commonResponse);
-    }
-
-    private boolean isDigit(String str) {
-        for (char c : str.toCharArray()) {
-            if (Character.isLetter(c)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

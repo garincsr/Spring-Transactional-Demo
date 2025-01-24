@@ -1,12 +1,11 @@
 package com.enigmacamp.enigshop_challenge.service.impl;
 
-import com.enigmacamp.enigshop_challenge.controller.exception.GlobalExceptionController;
 import com.enigmacamp.enigshop_challenge.model.dto.request.DepartementRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.DepartementResponse;
 import com.enigmacamp.enigshop_challenge.model.entity.Departement;
 import com.enigmacamp.enigshop_challenge.repository.DepartementRepository;
-import com.enigmacamp.enigshop_challenge.repository.specification.DepartementSpesification;
+import com.enigmacamp.enigshop_challenge.repository.specification.DepartementSpecification;
 import com.enigmacamp.enigshop_challenge.service.DepartementService;
 import com.enigmacamp.enigshop_challenge.utils.customException.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -44,12 +43,12 @@ public class DepartementServiceImpl implements DepartementService {
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
 
         if (request.getQuery() != null && !request.getQuery().isEmpty()) {
-            Specification<Departement> spec = Specification.where(DepartementSpesification.hasName(request.getQuery()));
+            Specification<Departement> spec = Specification.where(DepartementSpecification.hasName(request.getQuery()));
             return departementRepository.findAll(spec,pageable).map(this::mapToResponse);
         }
 
         if (request.getCode() != null && !request.getCode().isEmpty()){
-           Specification<Departement> spec = Specification.where(DepartementSpesification.hasCode(request.getCode()));
+           Specification<Departement> spec = Specification.where(DepartementSpecification.hasCode(request.getCode()));
             return departementRepository.findAll(spec,pageable).map(this::mapToResponse);
         }
 

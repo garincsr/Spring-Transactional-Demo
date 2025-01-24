@@ -1,16 +1,13 @@
 package com.enigmacamp.enigshop_challenge.controller;
 
 import com.enigmacamp.enigshop_challenge.constant.APIUrl;
-import com.enigmacamp.enigshop_challenge.controller.exception.GlobalExceptionController;
 import com.enigmacamp.enigshop_challenge.model.dto.request.DepartementRequest;
-import com.enigmacamp.enigshop_challenge.model.dto.request.ProductRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.CommonResponse;
 import com.enigmacamp.enigshop_challenge.model.dto.response.DepartementResponse;
 import com.enigmacamp.enigshop_challenge.model.dto.response.PagingResponse;
-import com.enigmacamp.enigshop_challenge.model.dto.response.ProductResponse;
 import com.enigmacamp.enigshop_challenge.service.DepartementService;
-import com.enigmacamp.enigshop_challenge.service.ProductService;
+import com.enigmacamp.enigshop_challenge.utils.PagingSizingUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -44,25 +41,20 @@ public class DepartementController {
     public ResponseEntity<CommonResponse<List<DepartementResponse>>> getAllDepartement(
             @RequestParam(name = "search",required = false) String name,
             @RequestParam(name = "code",required = false) String code,
-            @RequestParam(name = "page",defaultValue = "1") Integer page,
-            @RequestParam(name = "size",defaultValue = "10") Integer size,
+            @RequestParam(name = "page",defaultValue = "1") String page,
+            @RequestParam(name = "size",defaultValue = "10") String size,
             @RequestParam(name = "sort",defaultValue = "name") String sort,
             @RequestParam(name = "direction", defaultValue = "asc") String direction
     ) {
 
-        if (isDigit(page.toString()) || page <= 0) {
-            page = 1;
-        }
-
-        if (isDigit(size.toString()) || size <= 0) {
-            size = 10;
-        }
+        Integer validatedPage = PagingSizingUtils.validatePage(page);
+        Integer validatedSize = PagingSizingUtils.validateSize(size);
 
         SearchRequest request = SearchRequest.builder()
                 .query(name)
                 .code(code)
-                .page(Math.max(page - 1, 0))
-                .size(Math.max(size, 0))
+                .page(Math.max(validatedPage - 1, 0))
+                .size(Math.max(validatedSize, 0))
                 .sort(sort)
                 .direction(direction)
                 .build();
@@ -72,8 +64,8 @@ public class DepartementController {
         PagingResponse paging = PagingResponse.builder()
                 .totalPage(departements.getTotalPages())
                 .totalElement(departements.getTotalElements())
-                .page(page)
-                .size(size)
+                .page(validatedPage)
+                .size(validatedSize)
                 .hashNext(departements.hasNext())
                 .hashPrevious(departements.hasPrevious())
                 .build();
@@ -144,14 +136,5 @@ public class DepartementController {
         return ResponseEntity
                 .ok()
                 .body(response);
-    }
-
-    private boolean isDigit(String str) {
-        for (char c : str.toCharArray()) {
-            if (Character.isLetter(c)) {
-                return true;
-            }
-        }
-        return false;
     }
 }
