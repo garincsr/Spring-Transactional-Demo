@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path = APIUrl.TRANSACTION_API)
 @RequiredArgsConstructor
@@ -28,6 +30,20 @@ public class TransactionController {
               .message("New Product Added")
               .data(transaction)
               .build();
+
+        return ResponseEntity
+                .ok()
+                .body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<CommonResponse<List<TransactionResponse>>> getAllTransactions(){
+        List<TransactionResponse> transactions = transactionService.getAll();
+        CommonResponse<List<TransactionResponse>> response = CommonResponse.<List<TransactionResponse>>builder()
+                .status(HttpStatus.OK.value())
+                .message("Transactions Found")
+                .data(transactions)
+                .build();
 
         return ResponseEntity
                 .ok()

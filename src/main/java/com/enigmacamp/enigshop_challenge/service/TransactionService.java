@@ -7,5 +7,7 @@ import java.util.List;
 
 public interface TransactionService {
     TransactionResponse create (TransactionRequest transactionRequest);
+
+    List<TransactionResponse> getAll();
 //    List<TransactionResponse> getAll();
 }

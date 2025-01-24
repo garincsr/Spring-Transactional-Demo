@@ -1,7 +1,6 @@
 package com.enigmacamp.enigshop_challenge.service.impl;
 
 import com.enigmacamp.enigshop_challenge.model.dto.request.ProductRequest;
-import com.enigmacamp.enigshop_challenge.model.dto.request.TransactionDetailRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.request.TransactionRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.ProductResponse;
 import com.enigmacamp.enigshop_challenge.model.dto.response.TransactionDetailResponse;
@@ -20,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.naming.InsufficientResourcesException;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -102,6 +100,39 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionDetails(transactionDetailResponses)// Need more mapping
                 .totalPayment(totalPayment.get())
                 .build();
+    }
+
+    @Override
+    public List<TransactionResponse> getAll(){
+        List<Transaction> transactions = transactionRepository.findAll();
+
+        List<TransactionResponse> responses = transactions.stream().map(transaction -> {
+            List<TransactionDetailResponse> detailResponses = transaction.getTransactionDetails().stream().map(trxDetail -> {
+                ProductResponse productResponse = ProductResponse.builder()
+                        .id(trxDetail.getProduct().getId())
+                        .name(trxDetail.getProduct().getName())
+                        .description(trxDetail.getProduct().getDescription())
+                        .price(trxDetail.getProductPrice())
+                        .stock(trxDetail.getProduct().getStock())
+                        .build();
+
+                return TransactionDetailResponse.builder()
+                        .id(trxDetail.getId())
+                        .productResponse(productResponse)
+                        .productPrice(trxDetail.getProductPrice())
+                        .qty(trxDetail.getQty())
+                        .build();
+            }).toList();
+
+           return TransactionResponse.builder()
+                   .id(transaction.getId())
+                   .customer(transaction.getCustomer())
+                   .date(transaction.getTransactionDate())
+                   .transactionDetails(detailResponses)
+                   .build();
+        }).toList();
+
+        return responses;
     }
 
 }
