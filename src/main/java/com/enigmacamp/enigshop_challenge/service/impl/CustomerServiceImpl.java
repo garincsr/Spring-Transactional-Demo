@@ -72,6 +72,11 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.delete(existingCustomer);
     }
 
+    @Override
+    public Customer getCustomerById(String id) {
+        return findByIdOrThrowNotFound(id);
+    }
+
     private Customer mapToEntity(CustomerRequest request){
         return Customer.builder()
                 .fullName(request.getFullName())

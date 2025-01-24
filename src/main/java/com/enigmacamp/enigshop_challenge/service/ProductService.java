@@ -3,6 +3,7 @@ package com.enigmacamp.enigshop_challenge.service;
 import com.enigmacamp.enigshop_challenge.model.dto.request.ProductRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.ProductResponse;
+import com.enigmacamp.enigshop_challenge.model.entity.Customer;
 import com.enigmacamp.enigshop_challenge.model.entity.Product;
 import org.springframework.data.domain.Page;
 
@@ -13,4 +14,5 @@ public interface ProductService {
     ProductResponse updatePut(ProductRequest request);
     ProductResponse updatePatch(ProductRequest request);
     void deleteById(String id);
+    Product getProductById(String id);
 }

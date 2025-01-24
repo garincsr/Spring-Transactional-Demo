@@ -1,6 +1,7 @@
 package com.enigmacamp.enigshop_challenge.controller.exception;
 
 import com.enigmacamp.enigshop_challenge.model.dto.response.CommonResponse;
+import com.enigmacamp.enigshop_challenge.utils.customException.InsufficientStockException;
 import com.enigmacamp.enigshop_challenge.utils.customException.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionController {
 
-    @ExceptionHandler({ResourceNotFoundException.class})
+    @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<CommonResponse<String>> handleResourceNotFoundException(ResourceNotFoundException ex){
         CommonResponse<String> response = CommonResponse.<String>builder()
                 .status(HttpStatus.NOT_FOUND.value())
@@ -25,6 +26,18 @@ public class GlobalExceptionController {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .body(response);
+    }
+
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<CommonResponse<String>> handleInsufficientStockException(InsufficientStockException ex){
+        CommonResponse<String> response = CommonResponse.<String>builder()
+                .status(HttpStatus.GONE.value())
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.GONE)
                 .body(response);
     }
 
@@ -80,14 +93,5 @@ public class GlobalExceptionController {
                 .build();
 
         return ResponseEntity.badRequest().body(response);
-    }
-
-    public static boolean isDigit(String str) {
-        for (char c : str.toCharArray()) {
-            if (Character.isLetter(c)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

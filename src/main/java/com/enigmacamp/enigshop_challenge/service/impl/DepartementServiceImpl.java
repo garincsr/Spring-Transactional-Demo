@@ -39,7 +39,6 @@ public class DepartementServiceImpl implements DepartementService {
             sort = Sort.by(Sort.Direction.ASC, request.getSort());
         }
 
-        // Buat objek Pageable
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
 
         if (request.getQuery() != null && !request.getQuery().isEmpty()) {

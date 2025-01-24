@@ -95,6 +95,13 @@ public class ProductServiceImpl implements ProductService {
         productRepository.delete(existingProduct);
     }
 
+    @Override
+    public Product getProductById(String id) {
+        return findByIdOrThrowNotFound(id);
+    }
+
+
+
     private ProductResponse mapToResponse(Product product){
         return ProductResponse.builder()
                 .id(product.getId())

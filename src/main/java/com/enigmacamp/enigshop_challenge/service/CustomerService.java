@@ -15,4 +15,5 @@ public interface CustomerService {
     CustomerResponse updatePut(CustomerRequest request);
     CustomerResponse updatePatch(CustomerRequest request);
     void deleteById(String id);
+    Customer getCustomerById(String id);
 }

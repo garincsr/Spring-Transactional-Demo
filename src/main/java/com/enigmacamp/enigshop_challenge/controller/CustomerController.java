@@ -8,6 +8,7 @@ import com.enigmacamp.enigshop_challenge.model.dto.response.CommonResponse;
 import com.enigmacamp.enigshop_challenge.model.dto.response.CustomerResponse;
 import com.enigmacamp.enigshop_challenge.model.dto.response.PagingResponse;
 import com.enigmacamp.enigshop_challenge.service.CustomerService;
+import com.enigmacamp.enigshop_challenge.utils.PagingSizingUtils;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -44,33 +45,21 @@ public class CustomerController {
             @RequestParam(name = "page",defaultValue = "1") String  page,
             @RequestParam(name = "size",defaultValue = "10") String size
     ){
-//        Integer pageNumber = Math.max(page, 0);
-//        Integer sizeNumber = Math.max(size, 1);
-
-        if (GlobalExceptionController.isDigit(page)){
-            page = "1";
-        }
-
-        if (GlobalExceptionController.isDigit(size)){
-            size = "10";
-        }
-
-        if (size.equals("0")){
-            size = "10";
-        }
+        Integer validatePage = PagingSizingUtils.validatePage(page);
+        Integer validateSize = PagingSizingUtils.validateSize(size);
 
         SearchRequest request = SearchRequest.builder()
                 .query(search)
-                .page(Math.max(Integer.parseInt(page) - 1, 0))
-                .size(Math.max(Integer.parseInt(size), 0))
+                .page(Math.max(validatePage - 1, 0))
+                .size(Math.max(validateSize, 0))
                 .build();
 
         Page<CustomerResponse> customers = customerService.getAll(request);
         PagingResponse paging = PagingResponse.builder()
                 .totalPage(customers.getTotalPages())
                 .totalElement(customers.getTotalElements())
-                .page(Integer.parseInt(page))
-                .size(Integer.parseInt(size))
+                .page(validatePage)
+                .size(validateSize)
                 .hashNext(customers.hasNext())
                 .hashPrevious(customers.hasPrevious())
                 .build();
