@@ -8,6 +8,7 @@ import com.enigmacamp.enigshop_challenge.model.dto.response.DepartementResponse;
 import com.enigmacamp.enigshop_challenge.model.dto.response.PagingResponse;
 import com.enigmacamp.enigshop_challenge.service.DepartementService;
 import com.enigmacamp.enigshop_challenge.utils.PagingSizingUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class DepartementController {
     private final DepartementService departementService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<DepartementResponse>> addNewDepartemnt(@RequestBody DepartementRequest payload){
+    public ResponseEntity<CommonResponse<DepartementResponse>> addNewDepartemnt(@Valid @RequestBody DepartementRequest payload){
         DepartementResponse departement = departementService.create(payload);
         CommonResponse<DepartementResponse> response = CommonResponse.<DepartementResponse>builder()
                 .status(HttpStatus.CREATED.value())

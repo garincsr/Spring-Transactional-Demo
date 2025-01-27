@@ -8,6 +8,7 @@ import com.enigmacamp.enigshop_challenge.model.dto.response.PagingResponse;
 import com.enigmacamp.enigshop_challenge.model.dto.response.ProductResponse;
 import com.enigmacamp.enigshop_challenge.service.ProductService;
 import com.enigmacamp.enigshop_challenge.utils.PagingSizingUtils;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<CommonResponse<ProductResponse>> addNewProduct(@RequestBody ProductRequest payload){
+    public ResponseEntity<CommonResponse<ProductResponse>> addNewProduct(@Valid @RequestBody ProductRequest payload){
         ProductResponse product = productService.create(payload);
         CommonResponse<ProductResponse> response = CommonResponse.<ProductResponse>builder()
                 .status(HttpStatus.CREATED.value())

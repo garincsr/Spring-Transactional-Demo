@@ -41,6 +41,18 @@ public class GlobalExceptionController {
                 .body(response);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<CommonResponse<String>> handleIllegalArgumentException(IllegalArgumentException ex){
+        CommonResponse<String> response = CommonResponse.<String>builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<CommonResponse<List<Map<String, String>>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         List<Map<String, String>> fieldErrors = ex.getBindingResult().getFieldErrors().stream()

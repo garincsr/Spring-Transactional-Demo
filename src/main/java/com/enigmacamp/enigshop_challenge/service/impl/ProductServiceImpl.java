@@ -100,8 +100,6 @@ public class ProductServiceImpl implements ProductService {
         return findByIdOrThrowNotFound(id);
     }
 
-
-
     private ProductResponse mapToResponse(Product product){
         return ProductResponse.builder()
                 .id(product.getId())

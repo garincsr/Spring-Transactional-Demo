@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -47,6 +48,10 @@ public class TransactionServiceImpl implements TransactionService {
         List<TransactionDetail> transactionDetails = transactionRequest.getTransactionDetails().stream().map(detailRequest -> {
             Product product = productService.getProductById(detailRequest.getProductId());
             //TODO: Make sure quantity request less or equal than stock product
+            if (detailRequest.getQty() <= 0) {
+                throw new IllegalArgumentException("Quantity must be greater than zero.");
+            }
+
             if (detailRequest.getQty() > product.getStock()){
                 throw new InsufficientStockException("Insufficient stock for product: " + product.getName(),
                         new RuntimeException("Insufficient stock for product"));
@@ -66,7 +71,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .productPrice(product.getPrice())
                     .build();
 
-            totalPayment.updateAndGet(v -> v + product.getPrice()*detailRequest.getQty());
+            totalPayment.updateAndGet(v -> v + trxDetail.getProductPrice()*detailRequest.getQty());
 
             transactionDetailRepository.save(trxDetail);
             return trxDetail;
@@ -135,4 +140,36 @@ public class TransactionServiceImpl implements TransactionService {
         return responses;
     }
 
-}
+    public TransactionResponse getById (String id){
+        Optional<Transaction> optionalTransaction = transactionRepository.findById(id);
+        Transaction transaction = optionalTransaction.orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+        AtomicReference<Long> totalPayment = new AtomicReference<>(0L);
+        List<TransactionDetailResponse> detailResponses = transaction.getTransactionDetails().stream().map(trx -> {
+            ProductResponse productResponse = ProductResponse.builder()
+                    .id(trx.getProduct().getId())
+                    .name(trx.getProduct().getName())
+                    .description(trx.getProduct().getDescription())
+                    .price(trx.getProduct().getPrice())
+                    .stock(trx.getProduct().getStock())
+                    .build();
+
+            totalPayment.updateAndGet(v -> v + trx.getProductPrice()*trx.getQty());
+
+            return TransactionDetailResponse.builder()
+                    .id(trx.getId())
+                    .productResponse(productResponse)
+                    .productPrice(trx.getProductPrice())
+                    .qty(trx.getQty())
+                    .build();
+        }).toList();
+
+        return TransactionResponse.builder()
+                .id(transaction.getId())
+                .customer(transaction.getCustomer())
+                .date(transaction.getTransactionDate())
+                .transactionDetails(detailResponses)
+                .totalPayment(totalPayment.get())
+                .build();
+    }
+};
