@@ -49,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
         // Jika query pencarian disediakan, filter hasil
         if (request.getQuery() != null && !request.getQuery().isEmpty()) {
             Specification<Product> spec = Specification.where(ProductSpecification.hasName(request.getQuery()));
-            return productRepository.findAll(spec,pageable).map(this::mapToResponse);
+            return productRepository.findAll(spec,pageable) .map(this::mapToResponse);
         }
 
         return productRepository.findAll(pageable).map(this::mapToResponse);

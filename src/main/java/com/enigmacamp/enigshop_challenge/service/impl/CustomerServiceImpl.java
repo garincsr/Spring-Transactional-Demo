@@ -5,12 +5,15 @@ import com.enigmacamp.enigshop_challenge.model.dto.request.SearchRequest;
 import com.enigmacamp.enigshop_challenge.model.dto.response.CustomerResponse;
 import com.enigmacamp.enigshop_challenge.model.entity.Customer;
 import com.enigmacamp.enigshop_challenge.repository.CustomerRepository;
+import com.enigmacamp.enigshop_challenge.repository.specification.CustomerSpecification;
 import com.enigmacamp.enigshop_challenge.service.CustomerService;
 import com.enigmacamp.enigshop_challenge.utils.customException.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,7 +31,21 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Page<CustomerResponse> getAll(SearchRequest request) {
-        Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
+        Sort sort;
+        try {
+            sort = Sort.by(request.getDirection().equalsIgnoreCase("dsc") ? Sort.Direction.DESC : Sort.Direction.ASC, request.getSort());
+        }
+        catch (IllegalArgumentException e){
+            sort = Sort.by(Sort.Direction.ASC, request.getSort());
+        }
+
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
+
+        if (request.getQuery() != null && !request.getQuery().isEmpty()){
+            Specification<Customer> spec = Specification.where(CustomerSpecification.hasName(request.getQuery()));
+            return customerRepository.findAll(spec,pageable).map(this::mapToResponse);
+        }
+
         return customerRepository.findAll(pageable).map(this::mapToResponse);
     }
 

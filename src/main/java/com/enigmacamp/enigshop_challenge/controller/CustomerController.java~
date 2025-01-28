@@ -41,21 +41,17 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<CommonResponse<List<CustomerResponse>>> getAllCustomer(
-            @RequestParam(name = "search", required = false) String name,
+            @RequestParam(name = "search", required = false) String search,
             @RequestParam(name = "page",defaultValue = "1") String  page,
-            @RequestParam(name = "size",defaultValue = "10") String size,
-            @RequestParam(name = "sort",defaultValue = "id", required = false) String sort,
-            @RequestParam(name = "direction", defaultValue = "asc") String direction
+            @RequestParam(name = "size",defaultValue = "10") String size
     ){
         Integer validatePage = PagingSizingUtils.validatePage(page);
         Integer validateSize = PagingSizingUtils.validateSize(size);
 
         SearchRequest request = SearchRequest.builder()
-                .query(name)
+                .query(search)
                 .page(Math.max(validatePage - 1, 0))
                 .size(Math.max(validateSize, 0))
-                .sort(sort)
-                .direction(direction)
                 .build();
 
         Page<CustomerResponse> customers = customerService.getAll(request);
@@ -77,7 +73,6 @@ public class CustomerController {
 
         return ResponseEntity
                 .ok()
-                .header("Content type", "Application/json")
                 .body(commonResponse);
     }
 

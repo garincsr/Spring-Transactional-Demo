@@ -79,7 +79,7 @@ public class ProductController {
 
         return ResponseEntity
                 .ok()
-                .header("Content type", "Apllication/json")
+                .header("Content type", "Application/json")
                 .body(commonResponse);
     }
 
