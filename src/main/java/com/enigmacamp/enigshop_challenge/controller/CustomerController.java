@@ -52,7 +52,7 @@ public class CustomerController {
 
         SearchRequest request = SearchRequest.builder()
                 .query(name)
-                .page(Math.max(validatePage - 1, 0))
+                .page(Math.max(validatePage - 1 ,0))
                 .size(Math.max(validateSize, 0))
                 .sort(sort)
                 .direction(direction)

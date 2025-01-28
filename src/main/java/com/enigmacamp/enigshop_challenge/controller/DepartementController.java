@@ -54,7 +54,7 @@ public class DepartementController {
         SearchRequest request = SearchRequest.builder()
                 .query(name)
                 .code(code)
-                .page(Math.max(validatedPage - 1, 0))
+                .page(Math.max(validatedPage - 1 ,0))
                 .size(Math.max(validatedSize, 0))
                 .sort(sort)
                 .direction(direction)
